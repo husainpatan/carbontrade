@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarbonTrade Order Form</title>
+    <!-- Tailwind CSS for modern styling and responsive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define a custom font for a consistent, clean look, as requested */
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        /* Custom CSS for a vibrant blue gradient button with a subtle shadow and hover effect */
+        .btn-blue {
+            background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-blue:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* Custom CSS for a neutral grey button with a similar shadow and hover effect */
+        .btn-grey {
+            background: linear-gradient(180deg, #d1d5db 0%, #9ca3af 100%);
+            color: #1f2937;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-grey:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <!-- The main container for the form -->
+    <div id="order-form-container" class="w-full max-w-4xl bg-white p-8 rounded-lg shadow-xl border border-gray-200">
+        
+        <!-- Header with "CarbonTrade" on the left, "Order Form" centered, and "Show Dashboard" on the right -->
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">CarbonTrade</h2>
+            <h1 class="text-3xl font-bold text-gray-800 flex-grow text-center">Order Form</h1>
+            <button type="button" id="showDashboardBtn" class="py-2 px-4 rounded-md text-gray-700 font-semibold btn-grey">
+                Show Dashboard
+            </button>
+        </div>
+        
+        <!-- Submission status message box -->
+        <div id="statusMessage" class="hidden p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg" role="alert">
+            <span class="font-medium">Success!</span> Order submitted successfully.
+        </div>
+        
+        <form id="orderForm" class="space-y-6">
+            <!-- Date Picker and Order No side-by-side -->
+            <div class="flex space-x-4">
+                <div class="flex-1">
+                    <label for="orderDate" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <input type="date" id="orderDate" name="orderDate" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border">
+                </div>
+                <div class="flex-1">
+                    <label for="orderNumber" class="block text-sm font-medium text-gray-700 mb-1">Order No.</label>
+                    <input type="text" id="orderNumber" name="orderNumber" readonly
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 bg-gray-200 text-gray-700 cursor-not-allowed">
+                </div>
+            </div>
+
+            <!-- Customer Name -->
+            <div>
+                <label for="customerName" class="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
+                <input type="text" id="customerName" name="customerName" placeholder="John Doe" required
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border">
+            </div>
+
+            <!-- Customer Location -->
+            <div>
+                <label for="customerLocation" class="block text-sm font-medium text-gray-700 mb-1">Customer Location</label>
+                <input type="text" id="customerLocation" name="customerLocation" placeholder="123 Main St, Anytown" required
+                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border">
+            </div>
+
+            <!-- Items Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/2">Item Name</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Quantity</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Unit Price</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/8">Total Price</th>
+                            <th scope="col" class="relative px-3 py-3">
+                                <span class="sr-only">Delete</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemRows" class="bg-white divide-y divide-gray-200">
+                        <!-- Initial row will be added by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Add Item Button -->
+            <button type="button" id="addItemBtn" class="w-full py-2 px-4 rounded-md font-semibold btn-grey mt-4">
+                Add a new line
+            </button>
+
+            <!-- Total Summary -->
+            <div class="flex justify-end mt-4">
+                <div class="w-1/2 flex items-center justify-between space-x-4">
+                    <label for="orderSubtotal" class="text-lg font-bold text-gray-800">Order Subtotal:</label>
+                    <input type="text" id="orderSubtotal" name="orderSubtotal" readonly
+                           class="w-full max-w-[150px] rounded-md border-gray-300 shadow-sm p-2 bg-gray-200 text-gray-700 font-bold cursor-not-allowed">
+                </div>
+            </div>
+            
+            <!-- Payment Status -->
+            <div class="pt-4">
+                <p class="block text-sm font-medium text-gray-700 mb-2">Payment Status</p>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-4 sm:space-y-0">
+                    <div class="flex items-center space-x-2">
+                        <input id="paymentReceived" name="paymentStatus" type="radio" value="Received" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300" checked>
+                        <label for="paymentReceived" class="ml-2 block text-sm text-gray-900">Payment Received</label>
+                        <input type="number" id="receivedAmount" name="receivedAmount" placeholder="0.00" min="0" step="0.01" class="w-32 rounded-md border-gray-300 shadow-sm p-2 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border">
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input id="paymentPending" name="paymentStatus" type="radio" value="Pending" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300">
+                        <label for="paymentPending" class="ml-2 block text-sm text-gray-900">Payment Pending</label>
+                        <input type="number" id="pendingAmount" name="pendingAmount" placeholder="0.00" min="0" step="0.01" class="w-32 rounded-md border-gray-300 shadow-sm p-2 text-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="mt-6">
+                <button type="submit" class="w-full py-3 px-4 rounded-md text-white font-semibold btn-blue">
+                    Submit Order
+                </button>
+            </div>
+        </form>
+    </div>
+
+
+    <script>
+        // Placeholder for the Google Apps Script web app URL.
+        const WEB_APP_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+
+        /**
+         * Generates a unique order number based on the current timestamp.
+         * @returns {string} The generated order number string.
+         */
+        function generateOrderNumber() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const timestamp = now.getTime(); // Get milliseconds since epoch for uniqueness
+            
+            // Format: CT-YYYYMMDD-TIMESTAMP
+            return `CT-${year}${month}${day}-${timestamp}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const itemRowsBody = document.getElementById('itemRows');
+            const addItemBtn = document.getElementById('addItemBtn');
+            const orderForm = document.getElementById('orderForm');
+            const orderSubtotalInput = document.getElementById('orderSubtotal');
+            const receivedAmountInput = document.getElementById('receivedAmount');
+            const pendingAmountInput = document.getElementById('pendingAmount');
+            const paymentStatusRadios = document.querySelectorAll('input[name="paymentStatus"]');
+            const statusMessage = document.getElementById('statusMessage');
+            const showDashboardBtn = document.getElementById('showDashboardBtn');
+            const orderDateInput = document.getElementById('orderDate');
+            const orderNumberInput = document.getElementById('orderNumber');
+
+            // Set the current date and generate a unique order number on load
+            orderDateInput.value = new Date().toISOString().split('T')[0];
+            orderNumberInput.value = generateOrderNumber();
+            
+
+            /**
+             * Updates the total price for a single item row.
+             * @param {HTMLElement} row The table row element.
+             */
+            function updateTotalPrice(row) {
+                const quantityInput = row.querySelector('.quantity-input');
+                const unitPriceInput = row.querySelector('.unit-price-input');
+                const totalPriceOutput = row.querySelector('.total-price-output');
+
+                const quantity = parseFloat(quantityInput.value) || 0;
+                const unitPrice = parseFloat(unitPriceInput.value) || 0;
+                const total = quantity * unitPrice;
+                totalPriceOutput.value = total.toFixed(2);
+                updateOrderSubtotal(); // Recalculate the grand total
+            }
+
+            /**
+             * Calculates and updates the grand total of all items.
+             */
+            function updateOrderSubtotal() {
+                let subtotal = 0;
+                const totalPrices = document.querySelectorAll('.total-price-output');
+                totalPrices.forEach(input => {
+                    subtotal += parseFloat(input.value) || 0;
+                });
+                orderSubtotalInput.value = subtotal.toFixed(2);
+            }
+
+            /**
+             * Creates a new table row for an item.
+             * @returns {HTMLElement} The newly created table row.
+             */
+            function createItemRow() {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-3 py-2 whitespace-nowrap">
+                        <input type="text" name="itemName" placeholder="Item" required
+                               class="w-full rounded-md border-gray-300 shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border text-sm">
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                        <input type="number" name="quantity" min="1" value="1" required
+                               class="w-full rounded-md border-gray-300 shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border text-sm quantity-input">
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                        <input type="number" name="unitPrice" min="0" step="0.01" value="0.00" required
+                               class="w-full rounded-md border-gray-300 shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border text-sm unit-price-input">
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                        <input type="text" name="totalPrice" readonly
+                               class="w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-200 text-gray-700 cursor-not-allowed text-sm total-price-output">
+                    </td>
+                    <td class="px-3 py-2 whitespace-nowrap text-right text-sm font-medium">
+                        <button type="button" class="text-red-600 hover:text-red-900 delete-row-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.728-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </td>
+                `;
+
+                // Add event listeners for the new row's inputs
+                const quantityInput = row.querySelector('.quantity-input');
+                const unitPriceInput = row.querySelector('.unit-price-input');
+                
+                const updateHandler = () => updateTotalPrice(row);
+                
+                quantityInput.addEventListener('input', updateHandler);
+                unitPriceInput.addEventListener('input', updateHandler);
+
+                // Add event listener to the delete button
+                row.querySelector('.delete-row-btn').addEventListener('click', () => {
+                    row.remove();
+                    updateOrderSubtotal(); // Update subtotal after deleting a row
+                });
+
+                // Initial calculation for the new row
+                updateTotalPrice(row);
+
+                return row;
+            }
+
+            // Add initial row on load and update subtotal
+            itemRowsBody.appendChild(createItemRow());
+            updateOrderSubtotal();
+
+            // Add event listener to the "Add Item" button
+            addItemBtn.addEventListener('click', () => {
+                const newRow = createItemRow();
+                itemRowsBody.appendChild(newRow);
+            });
+
+            // Handle payment status input
+            paymentStatusRadios.forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    if (event.target.value === 'Received') {
+                        receivedAmountInput.disabled = false;
+                        pendingAmountInput.disabled = true;
+                        pendingAmountInput.value = '';
+                    } else if (event.target.value === 'Pending') {
+                        receivedAmountInput.disabled = true;
+                        receivedAmountInput.value = '';
+                        pendingAmountInput.disabled = false;
+                    }
+                });
+            });
+
+            // Event listener for the new "Show Dashboard" button to navigate to a new page
+            showDashboardBtn.addEventListener('click', () => {
+                // In a real application, this would redirect to a dashboard page.
+                // For this example, we'll just log to the console.
+                console.log('Navigating to dashboard...');
+                // window.location.href = 'dashboard.html';
+            });
+
+            // Handle form submission
+            orderForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                // Show loading state
+                statusMessage.textContent = 'Submitting order...';
+                statusMessage.className = 'p-4 mb-4 text-sm text-gray-700 bg-gray-100 rounded-lg';
+                statusMessage.style.display = 'block';
+
+                // Proceed with the form submission
+                submitOrderData();
+            });
+
+            // A separate function to handle the actual form submission
+            async function submitOrderData() {
+                const formData = new FormData(orderForm);
+                const orderData = {};
+                for (const [key, value] of formData.entries()) {
+                    orderData[key] = value;
+                }
+
+                const items = [];
+                const itemRows = document.querySelectorAll('#itemRows tr');
+                itemRows.forEach(row => {
+                    const itemName = row.querySelector('input[name="itemName"]').value;
+                    const quantity = row.querySelector('input[name="quantity"]').value;
+                    const unitPrice = row.querySelector('input[name="unitPrice"]').value;
+                    const totalPrice = row.querySelector('input[name="totalPrice"]').value;
+                    items.push({ itemName, quantity, unitPrice, totalPrice });
+                });
+
+                orderData.items = JSON.stringify(items); // Stringify for submission
+                orderData.subtotal = orderSubtotalInput.value;
+                orderData.orderNumber = orderNumberInput.value;
+
+                try {
+                    const response = await fetch(WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify(orderData),
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    
+                    if (response.ok) {
+                        statusMessage.textContent = 'Success! Order submitted successfully.';
+                        statusMessage.className = 'p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg';
+                        statusMessage.style.display = 'block';
+                        orderForm.reset();
+                        // Reset the item rows to just one
+                        itemRowsBody.innerHTML = '';
+                        itemRowsBody.appendChild(createItemRow());
+                        updateOrderSubtotal();
+                        // Generate a new order number for the next order
+                        orderNumberInput.value = generateOrderNumber();
+                    } else {
+                        statusMessage.textContent = 'Error: Failed to submit order.';
+                        statusMessage.className = 'p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg';
+                        statusMessage.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    statusMessage.textContent = 'Error: An unexpected error occurred.';
+                    statusMessage.className = 'p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg';
+                    statusMessage.style.display = 'block';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
