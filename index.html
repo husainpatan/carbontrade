@@ -1,213 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Form</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Form</title>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+    h1 { color: #007BFF; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #e9ecef; }
+    button { padding: 8px 12px; margin-top: 10px; background: #007BFF; color: white; border: none; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .total { font-weight: bold; }
+    .radio-group { margin: 10px 0; }
+</style>
 </head>
-<body class="bg-gray-100 p-4 sm:p-8 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl max-w-4xl w-full">
-        <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">Order Form</h1>
-        
-        <!-- Message Box -->
-        <div id="messageBox" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex items-center justify-center">
-            <div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-sm text-center">
-                <p id="messageText" class="text-lg font-semibold text-gray-800 mb-4"></p>
-                <button onclick="closeMessageBox()" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none">OK</button>
-            </div>
-        </div>
+<body>
 
-        <form id="orderForm" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="orderNumber" class="block text-sm font-medium text-gray-700">Order Number</label>
-                    <input type="text" id="orderNumber" name="orderNumber" readonly class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 p-2">
-                </div>
-                <div>
-                    <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
-                    <input type="date" id="date" name="date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2">
-                </div>
-                <div class="md:col-span-2">
-                    <label for="customerName" class="block text-sm font-medium text-gray-700">Customer Name</label>
-                    <input type="text" id="customerName" name="customerName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2">
-                </div>
-                <div class="md:col-span-2">
-                    <label for="customerLocation" class="block text-sm font-medium text-gray-700">Customer Location</label>
-                    <input type="text" id="customerLocation" name="customerLocation" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2">
-                </div>
-            </div>
+<h1>Order Form</h1>
 
-            <div class="overflow-x-auto rounded-lg shadow-md">
-                <table id="itemsTable" class="w-full text-sm text-left text-gray-500">
-                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                        <tr>
-                            <th scope="col" class="py-3 px-6 rounded-tl-lg">Product</th>
-                            <th scope="col" class="py-3 px-6">Quantity</th>
-                            <th scope="col" class="py-3 px-6">Unit Price</th>
-                            <th scope="col" class="py-3 px-6">Total</th>
-                            <th scope="col" class="py-3 px-6 rounded-tr-lg">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="bg-white border-b hover:bg-gray-50">
-                            <td class="py-2 px-4"><input type="text" name="product[]" required class="w-full border-none focus:ring-0 p-1"></td>
-                            <td class="py-2 px-4"><input type="number" name="quantity[]" min="1" value="1" required class="w-20 border-none focus:ring-0 p-1"></td>
-                            <td class="py-2 px-4"><input type="number" name="unitPrice[]" step="0.01" value="0" required class="w-24 border-none focus:ring-0 p-1"></td>
-                            <td class="py-2 px-4 font-semibold text-gray-900 rowTotal">0.00</td>
-                            <td class="py-2 px-4"><button type="button" onclick="removeRow(this)" class="text-red-500 hover:text-red-700 font-bold text-lg">×</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <button type="button" onclick="addRow()" class="w-full sm:w-auto px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md shadow-md focus:outline-none">Add More</button>
+<form id="orderForm">
+    <label>Order Number: <input type="text" id="orderNumber" name="orderNumber" readonly></label><br><br>
+    <label>Date: <input type="date" name="date" required></label><br><br>
+    <label>Customer Name: <input type="text" name="customerName" required></label><br><br>
+    <label>Customer Location: <input type="text" name="customerLocation" required></label><br><br>
 
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-6">
-                <p class="text-lg font-bold text-gray-800">Grand Total: <span id="grandTotal" class="text-blue-600">0.00</span></p>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 sm:mt-0">
-                    <div>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="paymentStatus" value="Received" class="form-radio text-blue-600" checked>
-                            <span class="ml-2 text-gray-700">Payment Received</span>
-                        </label>
-                    </div>
-                    <div>
-                        <label class="inline-flex items-center">
-                            <input type="radio" name="paymentStatus" value="Pending" class="form-radio text-blue-600">
-                            <span class="ml-2 text-gray-700">Payment Pending</span>
-                        </label>
-                    </div>
-                    <div>
-                        <label for="amountPaid" class="block text-sm font-medium text-gray-700 sr-only">Amount Paid</label>
-                        <input type="number" id="amountPaid" name="amountPaid" step="0.01" value="0" placeholder="Amount Paid" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2">
-                    </div>
-                </div>
-            </div>
+    <table id="itemsTable">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" name="product[]" required></td>
+                <td><input type="number" name="quantity[]" min="1" value="1" required></td>
+                <td><input type="number" name="unitPrice[]" step="0.01" value="0" required></td>
+                <td class="rowTotal">0.00</td>
+                <td><button type="button" onclick="removeRow(this)">X</button></td>
+            </tr>
+        </tbody>
+    </table>
 
-            <button type="submit" class="w-full px-4 py-3 bg-green-500 text-white font-semibold rounded-md shadow-md hover:bg-green-600 focus:outline-none mt-6">Submit Order</button>
-        </form>
+    <button type="button" onclick="addRow()">Add More</button>
+
+    <p class="total">Grand Total: <span id="grandTotal">0.00</span></p>
+
+    <div class="radio-group">
+        <label><input type="radio" name="paymentStatus" value="Received" checked> Payment Received</label>
+        <label><input type="radio" name="paymentStatus" value="Pending"> Payment Pending</label>
     </div>
 
-    <script>
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbwGIyoVWGgVutdNFgAqSJ88QAJoKlLgx4BUROYx5OAbgS5iGt1PDPJ3Ras5INOw835Ufw/exec";
+    <label>Amount Paid: <input type="number" name="amountPaid" step="0.01" value="0"></label><br><br>
 
-    function generateOrderNumber() {
-        const now = new Date();
-        const dd = String(now.getDate()).padStart(2, '0');
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const yy = String(now.getFullYear()).slice(-2);
-        const hh = String(now.getHours()).padStart(2, '0');
-        const min = String(now.getMinutes()).padStart(2, '0');
-        const ss = String(now.getSeconds()).padStart(2, '0');
-        return `${dd}${mm}${yy}${hh}${min}${ss}`;
-    }
+    <button type="submit">Submit Order</button>
+</form>
 
-    document.getElementById("orderNumber").value = generateOrderNumber();
+<script>
+function generateOrderNumber() {
+    const now = new Date();
+    const dd = String(now.getDate()).padStart(2, '0');
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const yy = String(now.getFullYear()).slice(-2);
+    const timestamp = now.getTime();
+    return `${dd}${mm}${yy}${timestamp}`;
+}
 
-    function addRow() {
-        const table = document.getElementById("itemsTable").getElementsByTagName('tbody')[0];
-        const row = table.insertRow();
-        row.innerHTML = `
-            <tr class="bg-white border-b hover:bg-gray-50">
-                <td class="py-2 px-4"><input type="text" name="product[]" required class="w-full border-none focus:ring-0 p-1"></td>
-                <td class="py-2 px-4"><input type="number" name="quantity[]" min="1" value="1" required class="w-20 border-none focus:ring-0 p-1"></td>
-                <td class="py-2 px-4"><input type="number" name="unitPrice[]" step="0.01" value="0" required class="w-24 border-none focus:ring-0 p-1"></td>
-                <td class="py-2 px-4 font-semibold text-gray-900 rowTotal">0.00</td>
-                <td class="py-2 px-4"><button type="button" onclick="removeRow(this)" class="text-red-500 hover:text-red-700 font-bold text-lg">×</button></td>
-            </tr>
-        `;
-    }
+document.getElementById("orderNumber").value = generateOrderNumber();
 
-    function removeRow(button) {
-        const row = button.closest("tr");
-        row.remove();
+function addRow() {
+    const table = document.getElementById("itemsTable").getElementsByTagName('tbody')[0];
+    const row = table.insertRow();
+    row.innerHTML = `
+        <td><input type="text" name="product[]" required></td>
+        <td><input type="number" name="quantity[]" min="1" value="1" required></td>
+        <td><input type="number" name="unitPrice[]" step="0.01" value="0" required></td>
+        <td class="rowTotal">0.00</td>
+        <td><button type="button" onclick="removeRow(this)">X</button></td>
+    `;
+}
+
+function removeRow(button) {
+    const row = button.closest("tr");
+    row.remove();
+    updateTotals();
+}
+
+function updateTotals() {
+    let grandTotal = 0;
+    const rows = document.querySelectorAll("#itemsTable tbody tr");
+    rows.forEach(row => {
+        const qty = parseFloat(row.querySelector('input[name="quantity[]"]').value) || 0;
+        const price = parseFloat(row.querySelector('input[name="unitPrice[]"]').value) || 0;
+        const total = qty * price;
+        row.querySelector(".rowTotal").textContent = total.toFixed(2);
+        grandTotal += total;
+    });
+    document.getElementById("grandTotal").textContent = grandTotal.toFixed(2);
+}
+
+document.addEventListener("input", function(e) {
+    if (e.target.name === "quantity[]" || e.target.name === "unitPrice[]") {
         updateTotals();
     }
+});
 
-    function updateTotals() {
-        let grandTotal = 0;
-        const rows = document.querySelectorAll("#itemsTable tbody tr");
-        rows.forEach(row => {
-            const qty = parseFloat(row.querySelector('input[name="quantity[]"]').value) || 0;
-            const price = parseFloat(row.querySelector('input[name="unitPrice[]"]').value) || 0;
-            const total = qty * price;
-            row.querySelector(".rowTotal").textContent = total.toFixed(2);
-            grandTotal += total;
-        });
-        document.getElementById("grandTotal").textContent = grandTotal.toFixed(2);
-    }
+document.getElementById("orderForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch("https://script.google.com/macros/s/AKfycbwGIyoVWGgVutdNFgAqSJ88QAJoKlLgx4BUROYx5OAbgS5iGt1PDPJ3Ras5INOw835Ufw/exec", { method: "POST", body: formData })
+        .then(res => alert("Order submitted successfully!"))
+        .catch(err => alert("Error submitting order"));
+});
+</script>
 
-    function showMessageBox(message) {
-        document.getElementById('messageText').innerText = message;
-        document.getElementById('messageBox').classList.remove('hidden');
-    }
-
-    function closeMessageBox() {
-        document.getElementById('messageBox').classList.add('hidden');
-    }
-
-    document.addEventListener("input", function(e) {
-        if (e.target.name === "quantity[]" || e.target.name === "unitPrice[]") {
-            updateTotals();
-        }
-    });
-
-    document.getElementById("orderForm").addEventListener("submit", function(e) {
-        e.preventDefault();
-        
-        // Collect all data into a single object
-        const formData = {
-            orderNumber: document.getElementById('orderNumber').value,
-            orderDate: document.getElementById('date').value,
-            customerName: document.getElementById('customerName').value,
-            customerLocation: document.getElementById('customerLocation').value,
-            orderSubtotal: document.getElementById('grandTotal').textContent,
-            paymentStatus: document.querySelector('input[name="paymentStatus"]:checked').value,
-            receivedAmount: document.getElementById('amountPaid').value,
-            items: []
-        };
-        
-        const rows = document.querySelectorAll("#itemsTable tbody tr");
-        rows.forEach(row => {
-            const product = row.querySelector('input[name="product[]"]').value;
-            const quantity = row.querySelector('input[name="quantity[]"]').value;
-            const unitPrice = row.querySelector('input[name="unitPrice[]"]').value;
-            const rowTotal = row.querySelector(".rowTotal").textContent;
-            
-            formData.items.push({
-                itemName: product,
-                quantity: quantity,
-                unitPrice: unitPrice,
-                totalPrice: rowTotal
-            });
-        });
-
-        // Use JSON.stringify and the correct headers for the fetch request
-        fetch(webAppUrl, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.result === 'success') {
-                showMessageBox("Order submitted successfully!");
-            } else {
-                showMessageBox("Error submitting order: " + data.message);
-            }
-        })
-        .catch(error => {
-            showMessageBox("Error: An unexpected error occurred.");
-            console.error('Fetch error:', error);
-        });
-    });
-    </script>
 </body>
 </html>
