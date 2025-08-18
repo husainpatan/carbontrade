@@ -1,123 +1,332 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Order Form</title>
-<style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
-    h1 { color: #007BFF; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background: #e9ecef; }
-    button { padding: 8px 12px; margin-top: 10px; background: #007BFF; color: white; border: none; cursor: pointer; }
-    button:hover { background: #0056b3; }
-    .total { font-weight: bold; }
-    .radio-group { margin: 10px 0; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Order Form</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple animation for the loader */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loader {
+            border: 4px solid rgba(0, 0, 0, .1);
+            border-left-color: #4f46e5;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-100">
 
-<h1>Order Form</h1>
+    <div class="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
+        <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+            <div class="mb-8 text-center">
+                <h1 class="text-3xl font-bold text-gray-800">Order Form</h1>
+                <p class="text-gray-500 mt-2">Create and submit a new customer order.</p>
+            </div>
 
-<form id="orderForm">
-    <label>Order Number: <input type="text" id="orderNumber" name="orderNumber" readonly></label><br><br>
-    <label>Date: <input type="date" name="date" required></label><br><br>
-    <label>Customer Name: <input type="text" name="customerName" required></label><br><br>
-    <label>Customer Location: <input type="text" name="customerLocation" required></label><br><br>
+            <!-- Message Box for notifications -->
+            <div id="message-box" class="hidden mb-6 p-4 rounded-lg text-center"></div>
 
-    <table id="itemsTable">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Unit Price</th>
-                <th>Total</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><input type="text" name="product[]" required></td>
-                <td><input type="number" name="quantity[]" min="1" value="1" required></td>
-                <td><input type="number" name="unitPrice[]" step="0.01" value="0" required></td>
-                <td class="rowTotal">0.00</td>
-                <td><button type="button" onclick="removeRow(this)">X</button></td>
-            </tr>
-        </tbody>
-    </table>
+            <form id="order-form">
+                <!-- Top Section: Order Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="order-date" class="block text-sm font-medium text-gray-700 mb-1">Order Date</label>
+                        <input type="date" id="order-date" name="order-date" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                    </div>
+                    <div>
+                        <label for="order-number" class="block text-sm font-medium text-gray-700 mb-1">Order Number</label>
+                        <input type="text" id="order-number" name="order-number" readonly class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label for="customer-name" class="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
+                        <input type="text" id="customer-name" name="customer-name" required placeholder="e.g., John Doe" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                    </div>
+                    <div>
+                        <label for="customer-location" class="block text-sm font-medium text-gray-700 mb-1">Customer Location</label>
+                        <input type="text" id="customer-location" name="customer-location" required placeholder="e.g., New York" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                    </div>
+                </div>
 
-    <button type="button" onclick="addRow()">Add More</button>
+                <!-- Middle Section: Line Items -->
+                <div class="mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-3">Products</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                    <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Qty</th>
+                                    <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Price (₹)</th>
+                                    <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Amount (₹)</th>
+                                    <th class="p-3 w-12"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="line-items">
+                                <!-- Line items will be added here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="button" id="add-item-btn" class="mt-4 px-4 py-2 bg-indigo-100 text-indigo-700 font-medium rounded-lg hover:bg-indigo-200 transition text-sm">
+                        + Add Line Item
+                    </button>
+                </div>
+                
+                <!-- Bottom Section: Totals and Payment -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start border-t pt-6">
+                    <!-- Payment Section -->
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">Payment Details</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <input type="radio" id="payment-pending" name="payment-status" value="Pending" checked class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                <label for="payment-pending" class="ml-3 block text-sm font-medium text-gray-700">Payment Pending</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="payment-received" name="payment-status" value="Received" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                <label for="payment-received" class="ml-3 block text-sm font-medium text-gray-700">Payment Received</label>
+                            </div>
+                            <div>
+                                <label for="amount-paid" class="block text-sm font-medium text-gray-700 mb-1">Amount Paid (₹)</label>
+                                <input type="number" id="amount-paid" name="amount-paid" value="0" min="0" step="0.01" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Total Amount Section -->
+                    <div class="text-right mt-4 md:mt-0">
+                         <div class="bg-gray-50 p-6 rounded-lg">
+                            <p class="text-gray-600 text-lg">Total Amount</p>
+                            <p id="total-amount" class="text-4xl font-bold text-gray-900">₹0.00</p>
+                         </div>
+                    </div>
+                </div>
 
-    <p class="total">Grand Total: <span id="grandTotal">0.00</span></p>
-
-    <div class="radio-group">
-        <label><input type="radio" name="paymentStatus" value="Received" checked> Payment Received</label>
-        <label><input type="radio" name="paymentStatus" value="Pending"> Payment Pending</label>
+                <!-- Submit Button -->
+                <div class="mt-8 text-center">
+                    <button type="submit" id="submit-btn" class="w-full md:w-auto inline-flex justify-center items-center px-12 py-4 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                        <span id="submit-btn-text">Submit Order</span>
+                        <div id="submit-loader" class="loader hidden ml-3"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <label>Amount Paid: <input type="number" name="amountPaid" step="0.01" value="0"></label><br><br>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- CONFIGURATION ---
+            // TODO: PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
+            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJ9v50qslwPgO93C2Ij40lGmlBNEDU5PmDwqg2xWFoZxhhGHWaf8d4NzDPytWp16hm/exec';
+            // ---------------------
 
-    <button type="submit">Submit Order</button>
-</form>
+            const form = document.getElementById('order-form');
+            const lineItemsContainer = document.getElementById('line-items');
+            const addItemBtn = document.getElementById('add-item-btn');
+            const totalAmountEl = document.getElementById('total-amount');
+            const messageBox = document.getElementById('message-box');
+            
+            const submitBtn = document.getElementById('submit-btn');
+            const submitBtnText = document.getElementById('submit-btn-text');
+            const submitLoader = document.getElementById('submit-loader');
 
-<script>
-function generateOrderNumber() {
-    const now = new Date();
-    const dd = String(now.getDate()).padStart(2, '0');
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const yy = String(now.getFullYear()).slice(-2);
-    const timestamp = now.getTime();
-    return `${dd}${mm}${yy}${timestamp}`;
-}
+            // --- INITIALIZATION ---
+            function initializeForm() {
+                // Set today's date
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('order-date').value = today;
 
-document.getElementById("orderNumber").value = generateOrderNumber();
+                // Generate and set order number
+                generateOrderNumber();
+                
+                // Add one initial line item
+                addLineItem();
+            }
 
-function addRow() {
-    const table = document.getElementById("itemsTable").getElementsByTagName('tbody')[0];
-    const row = table.insertRow();
-    row.innerHTML = `
-        <td><input type="text" name="product[]" required></td>
-        <td><input type="number" name="quantity[]" min="1" value="1" required></td>
-        <td><input type="number" name="unitPrice[]" step="0.01" value="0" required></td>
-        <td class="rowTotal">0.00</td>
-        <td><button type="button" onclick="removeRow(this)">X</button></td>
-    `;
-}
+            function generateOrderNumber() {
+                const now = new Date();
+                const dd = String(now.getDate()).padStart(2, '0');
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const yy = String(now.getFullYear()).slice(-2);
+                const hh = String(now.getHours()).padStart(2, '0');
+                const min = String(now.getMinutes()).padStart(2, '0');
+                const ss = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('order-number').value = `${dd}${mm}${yy}${hh}${min}${ss}`;
+            }
 
-function removeRow(button) {
-    const row = button.closest("tr");
-    row.remove();
-    updateTotals();
-}
+            // --- LINE ITEM MANAGEMENT ---
+            function addLineItem() {
+                const itemRow = document.createElement('tr');
+                itemRow.className = 'item-row';
+                itemRow.innerHTML = `
+                    <td class="p-1"><input type="text" name="product" placeholder="Product Name" class="w-full p-2 border border-gray-300 rounded-md" required></td>
+                    <td class="p-1"><input type="number" name="quantity" value="1" min="1" class="w-full p-2 border border-gray-300 rounded-md quantity-input" required></td>
+                    <td class="p-1"><input type="number" name="price" value="0.00" min="0" step="0.01" class="w-full p-2 border border-gray-300 rounded-md price-input" required></td>
+                    <td class="p-1"><input type="text" name="amount" readonly class="w-full p-2 border-gray-300 rounded-md bg-gray-100 amount-display"></td>
+                    <td class="p-1 text-center">
+                        <button type="button" class="remove-item-btn text-red-500 hover:text-red-700 font-bold">✕</button>
+                    </td>
+                `;
+                lineItemsContainer.appendChild(itemRow);
+                updateCalculations();
+            }
 
-function updateTotals() {
-    let grandTotal = 0;
-    const rows = document.querySelectorAll("#itemsTable tbody tr");
-    rows.forEach(row => {
-        const qty = parseFloat(row.querySelector('input[name="quantity[]"]').value) || 0;
-        const price = parseFloat(row.querySelector('input[name="unitPrice[]"]').value) || 0;
-        const total = qty * price;
-        row.querySelector(".rowTotal").textContent = total.toFixed(2);
-        grandTotal += total;
-    });
-    document.getElementById("grandTotal").textContent = grandTotal.toFixed(2);
-}
+            function removeLineItem(button) {
+                // Prevent removing the last item
+                if (document.querySelectorAll('.item-row').length > 1) {
+                    button.closest('.item-row').remove();
+                    updateCalculations();
+                } else {
+                    showMessage('You must have at least one line item.', 'warning');
+                }
+            }
+            
+            // --- CALCULATIONS ---
+            function updateCalculations() {
+                let total = 0;
+                document.querySelectorAll('.item-row').forEach(row => {
+                    const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+                    const price = parseFloat(row.querySelector('.price-input').value) || 0;
+                    const amount = quantity * price;
+                    row.querySelector('.amount-display').value = formatCurrency(amount);
+                    total += amount;
+                });
+                totalAmountEl.textContent = formatCurrency(total);
+            }
 
-document.addEventListener("input", function(e) {
-    if (e.target.name === "quantity[]" || e.target.name === "unitPrice[]") {
-        updateTotals();
-    }
-});
+            function formatCurrency(value) {
+                return `₹${Number(value).toFixed(2)}`;
+            }
+            
+            // --- EVENT LISTENERS ---
+            addItemBtn.addEventListener('click', addLineItem);
 
-document.getElementById("orderForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-    const formData = new FormData(this);
-    fetch("https://script.google.com/macros/s/AKfycbwGIyoVWGgVutdNFgAqSJ88QAJoKlLgx4BUROYx5OAbgS5iGt1PDPJ3Ras5INOw835Ufw/exec", { method: "POST", body: formData })
-        .then(res => alert("Order submitted successfully!"))
-        .catch(err => alert("Error submitting order"));
-});
-</script>
+            lineItemsContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-item-btn')) {
+                    removeLineItem(e.target);
+                }
+            });
+
+            form.addEventListener('input', function(e) {
+                if (e.target.classList.contains('quantity-input') || e.target.classList.contains('price-input')) {
+                    updateCalculations();
+                }
+            });
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL') {
+                    showMessage('Please update the SCRIPT_URL in the HTML file.', 'error');
+                    return;
+                }
+                submitForm();
+            });
+
+            // --- FORM SUBMISSION ---
+            async function submitForm() {
+                setLoading(true);
+
+                const items = [];
+                document.querySelectorAll('.item-row').forEach(row => {
+                    const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+                    const price = parseFloat(row.querySelector('.price-input').value) || 0;
+                    items.push({
+                        product: row.querySelector('input[name="product"]').value,
+                        quantity: quantity,
+                        price: price,
+                        amount: quantity * price
+                    });
+                });
+
+                const formData = {
+                    orderDate: document.getElementById('order-date').value,
+                    orderNumber: document.getElementById('order-number').value,
+                    customerName: document.getElementById('customer-name').value,
+                    customerLocation: document.getElementById('customer-location').value,
+                    items: items,
+                    totalAmount: parseFloat(totalAmountEl.textContent.replace('₹', '')),
+                    paymentStatus: document.querySelector('input[name="payment-status"]:checked').value,
+                    amountPaid: parseFloat(document.getElementById('amount-paid').value) || 0,
+                };
+
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'cors',
+                        cache: 'no-cache',
+                        headers: {
+                            'Content-Type': 'text/plain;charset=utf-8', // Required for Apps Script
+                        },
+                        body: JSON.stringify(formData),
+                        redirect: 'follow'
+                    });
+
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        showMessage(`Success! <a href="${result.pdfLink}" target="_blank" class="font-bold underline">View PDF</a>`, 'success');
+                        form.reset();
+                        // Clear all but one line item
+                        while (document.querySelectorAll('.item-row').length > 1) {
+                            lineItemsContainer.removeChild(lineItemsContainer.lastChild);
+                        }
+                        initializeForm();
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    console.error('Submission Error:', error);
+                    showMessage(`Error: ${error.message}`, 'error');
+                } finally {
+                    setLoading(false);
+                }
+            }
+
+            // --- UI HELPERS ---
+            function setLoading(isLoading) {
+                if (isLoading) {
+                    submitBtn.disabled = true;
+                    submitBtnText.classList.add('hidden');
+                    submitLoader.classList.remove('hidden');
+                } else {
+                    submitBtn.disabled = false;
+                    submitBtnText.classList.remove('hidden');
+                    submitLoader.classList.add('hidden');
+                }
+            }
+
+            function showMessage(message, type = 'info') {
+                messageBox.innerHTML = message;
+                messageBox.className = 'mb-6 p-4 rounded-lg text-center'; // Reset classes
+                if (type === 'success') {
+                    messageBox.classList.add('bg-green-100', 'text-green-800');
+                } else if (type === 'error') {
+                    messageBox.classList.add('bg-red-100', 'text-red-800');
+                } else if (type === 'warning') {
+                    messageBox.classList.add('bg-yellow-100', 'text-yellow-800');
+                } else {
+                    messageBox.classList.add('bg-blue-100', 'text-blue-800');
+                }
+                messageBox.classList.remove('hidden');
+                window.scrollTo(0, 0);
+            }
+
+            // --- START THE APP ---
+            initializeForm();
+        });
+    </script>
 
 </body>
 </html>
