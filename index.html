@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -33,7 +33,7 @@
     <div class="container mx-auto max-w-4xl p-4 sm:p-6 lg:p-8">
         <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
             <div class="mb-8 text-center">
-                <h1 class="text-3xl font-bold text-gray-800">Order Form</h1>
+                <h1 class="text-3xl font-bold text-gray-800">CarbonTrade Order Form</h1>
                 <p class="text-gray-500 mt-2">Create and submit a new customer order.</p>
             </div>
 
@@ -58,6 +58,14 @@
                     <div>
                         <label for="customer-location" class="block text-sm font-medium text-gray-700 mb-1">Customer Location</label>
                         <input type="text" id="customer-location" name="customer-location" required placeholder="e.g., New York" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                    </div>
+                    <div>
+                        <label for="customer-contact" class="block text-sm font-medium text-gray-700 mb-1">Customer Contact</label>
+                        <input type="tel" id="customer-contact" name="customer-contact" placeholder="e.g., 9876543210" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                    </div>
+                    <div class="md:col-span-2">
+                         <label for="remarks" class="block text-sm font-medium text-gray-700 mb-1">Remarks / Notes</label>
+                         <textarea id="remarks" name="remarks" rows="3" placeholder="Add any special instructions or notes here..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
                     </div>
                 </div>
 
@@ -101,7 +109,7 @@
                             </div>
                             <div>
                                 <label for="amount-paid" class="block text-sm font-medium text-gray-700 mb-1">Amount Paid (₹)</label>
-                                <input type="number" id="amount-paid" name="amount-paid" value="0" min="0" step="0.01" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                <input type="number" id="amount-paid" name="amount-paid" placeholder="0.00" min="0" step="0.01" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
                             </div>
                         </div>
                     </div>
@@ -129,7 +137,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // --- CONFIGURATION ---
             // TODO: PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
-            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJ9v50qslwPgO93C2Ij40lGmlBNEDU5PmDwqg2xWFoZxhhGHWaf8d4NzDPytWp16hm/exec';
+            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz5zJqqdgiq771kjWgzx2X-_auSmBSAmhg4d7le9oRNrz2atz7PFDmY66fbklT_hpwr/exec';
             // ---------------------
 
             const form = document.getElementById('order-form');
@@ -137,21 +145,16 @@
             const addItemBtn = document.getElementById('add-item-btn');
             const totalAmountEl = document.getElementById('total-amount');
             const messageBox = document.getElementById('message-box');
+            const amountPaidInput = document.getElementById('amount-paid');
             
             const submitBtn = document.getElementById('submit-btn');
             const submitBtnText = document.getElementById('submit-btn-text');
             const submitLoader = document.getElementById('submit-loader');
 
-            // --- INITIALIZATION ---
             function initializeForm() {
-                // Set today's date
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('order-date').value = today;
-
-                // Generate and set order number
                 generateOrderNumber();
-                
-                // Add one initial line item
                 addLineItem();
             }
 
@@ -166,14 +169,13 @@
                 document.getElementById('order-number').value = `${dd}${mm}${yy}${hh}${min}${ss}`;
             }
 
-            // --- LINE ITEM MANAGEMENT ---
             function addLineItem() {
                 const itemRow = document.createElement('tr');
                 itemRow.className = 'item-row';
                 itemRow.innerHTML = `
                     <td class="p-1"><input type="text" name="product" placeholder="Product Name" class="w-full p-2 border border-gray-300 rounded-md" required></td>
                     <td class="p-1"><input type="number" name="quantity" value="1" min="1" class="w-full p-2 border border-gray-300 rounded-md quantity-input" required></td>
-                    <td class="p-1"><input type="number" name="price" value="0.00" min="0" step="0.01" class="w-full p-2 border border-gray-300 rounded-md price-input" required></td>
+                    <td class="p-1"><input type="number" name="price" placeholder="0.00" min="0" step="0.01" class="w-full p-2 border border-gray-300 rounded-md price-input" required></td>
                     <td class="p-1"><input type="text" name="amount" readonly class="w-full p-2 border-gray-300 rounded-md bg-gray-100 amount-display"></td>
                     <td class="p-1 text-center">
                         <button type="button" class="remove-item-btn text-red-500 hover:text-red-700 font-bold">✕</button>
@@ -184,7 +186,6 @@
             }
 
             function removeLineItem(button) {
-                // Prevent removing the last item
                 if (document.querySelectorAll('.item-row').length > 1) {
                     button.closest('.item-row').remove();
                     updateCalculations();
@@ -193,7 +194,6 @@
                 }
             }
             
-            // --- CALCULATIONS ---
             function updateCalculations() {
                 let total = 0;
                 document.querySelectorAll('.item-row').forEach(row => {
@@ -204,50 +204,56 @@
                     total += amount;
                 });
                 totalAmountEl.textContent = formatCurrency(total);
+                updatePaymentStatus(); 
             }
 
             function formatCurrency(value) {
                 return `₹${Number(value).toFixed(2)}`;
             }
-            
-            // --- EVENT LISTENERS ---
-            addItemBtn.addEventListener('click', addLineItem);
 
-            lineItemsContainer.addEventListener('click', function(e) {
-                if (e.target.classList.contains('remove-item-btn')) {
-                    removeLineItem(e.target);
+            function updatePaymentStatus() {
+                const totalAmount = parseFloat(totalAmountEl.textContent.replace('₹', '')) || 0;
+                const amountPaid = parseFloat(amountPaidInput.value) || 0;
+
+                if (amountPaid >= totalAmount && totalAmount > 0) {
+                    document.getElementById('payment-received').checked = true;
+                } else {
+                    document.getElementById('payment-pending').checked = true;
                 }
+            }
+            
+            addItemBtn.addEventListener('click', addLineItem);
+            lineItemsContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-item-btn')) removeLineItem(e.target);
             });
-
-            form.addEventListener('input', function(e) {
+            form.addEventListener('input', (e) => {
                 if (e.target.classList.contains('quantity-input') || e.target.classList.contains('price-input')) {
                     updateCalculations();
                 }
             });
+            amountPaidInput.addEventListener('input', updatePaymentStatus);
 
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', (e) => {
                 e.preventDefault();
-                if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL') {
+                if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL' || !SCRIPT_URL) {
                     showMessage('Please update the SCRIPT_URL in the HTML file.', 'error');
                     return;
                 }
                 submitForm();
             });
 
-            // --- FORM SUBMISSION ---
             async function submitForm() {
                 setLoading(true);
 
-                const items = [];
-                document.querySelectorAll('.item-row').forEach(row => {
+                const items = Array.from(document.querySelectorAll('.item-row')).map(row => {
                     const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
                     const price = parseFloat(row.querySelector('.price-input').value) || 0;
-                    items.push({
+                    return {
                         product: row.querySelector('input[name="product"]').value,
                         quantity: quantity,
                         price: price,
                         amount: quantity * price
-                    });
+                    };
                 });
 
                 const formData = {
@@ -255,75 +261,69 @@
                     orderNumber: document.getElementById('order-number').value,
                     customerName: document.getElementById('customer-name').value,
                     customerLocation: document.getElementById('customer-location').value,
+                    customerContact: document.getElementById('customer-contact').value,
+                    remarks: document.getElementById('remarks').value,
                     items: items,
                     totalAmount: parseFloat(totalAmountEl.textContent.replace('₹', '')),
                     paymentStatus: document.querySelector('input[name="payment-status"]:checked').value,
                     amountPaid: parseFloat(document.getElementById('amount-paid').value) || 0,
                 };
 
+                // --- CHANGE: Reverted to a simpler fetch request to avoid preflight issues ---
                 try {
                     const response = await fetch(SCRIPT_URL, {
                         method: 'POST',
                         mode: 'cors',
                         cache: 'no-cache',
                         headers: {
-                            'Content-Type': 'text/plain;charset=utf-8', // Required for Apps Script
+                            'Content-Type': 'text/plain;charset=utf-8', // Use text/plain to avoid preflight
                         },
                         body: JSON.stringify(formData),
                         redirect: 'follow'
                     });
 
-                    const result = await response.json();
+                    // Since the response from a simple request might not be easily parsed as JSON,
+                    // we handle it more carefully.
+                    const text = await response.text();
+                    const result = JSON.parse(text);
 
                     if (result.status === 'success') {
                         showMessage(`Success! <a href="${result.pdfLink}" target="_blank" class="font-bold underline">View PDF</a>`, 'success');
                         form.reset();
-                        // Clear all but one line item
                         while (document.querySelectorAll('.item-row').length > 1) {
                             lineItemsContainer.removeChild(lineItemsContainer.lastChild);
                         }
                         initializeForm();
                     } else {
-                        throw new Error(result.message);
+                        throw new Error(result.message || 'The script reported an error.');
                     }
                 } catch (error) {
                     console.error('Submission Error:', error);
-                    showMessage(`Error: ${error.message}`, 'error');
+                    showMessage(`Error: ${error.message}. Check the browser console (F12) for more details.`, 'error');
                 } finally {
                     setLoading(false);
                 }
             }
 
-            // --- UI HELPERS ---
             function setLoading(isLoading) {
-                if (isLoading) {
-                    submitBtn.disabled = true;
-                    submitBtnText.classList.add('hidden');
-                    submitLoader.classList.remove('hidden');
-                } else {
-                    submitBtn.disabled = false;
-                    submitBtnText.classList.remove('hidden');
-                    submitLoader.classList.add('hidden');
-                }
+                submitBtn.disabled = isLoading;
+                submitBtnText.classList.toggle('hidden', isLoading);
+                submitLoader.classList.toggle('hidden', !isLoading);
             }
 
             function showMessage(message, type = 'info') {
                 messageBox.innerHTML = message;
-                messageBox.className = 'mb-6 p-4 rounded-lg text-center'; // Reset classes
-                if (type === 'success') {
-                    messageBox.classList.add('bg-green-100', 'text-green-800');
-                } else if (type === 'error') {
-                    messageBox.classList.add('bg-red-100', 'text-red-800');
-                } else if (type === 'warning') {
-                    messageBox.classList.add('bg-yellow-100', 'text-yellow-800');
-                } else {
-                    messageBox.classList.add('bg-blue-100', 'text-blue-800');
-                }
+                const typeClasses = {
+                    success: ['bg-green-100', 'text-green-800'],
+                    error: ['bg-red-100', 'text-red-800'],
+                    warning: ['bg-yellow-100', 'text-yellow-800'],
+                    info: ['bg-blue-100', 'text-blue-800']
+                };
+                messageBox.className = `mb-6 p-4 rounded-lg text-center ${(typeClasses[type] || typeClasses.info).join(' ')}`;
                 messageBox.classList.remove('hidden');
                 window.scrollTo(0, 0);
             }
 
-            // --- START THE APP ---
             initializeForm();
         });
     </script>
